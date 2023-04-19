@@ -1,5 +1,6 @@
 package ohm.softa.a05.collections;
 
+import javax.lang.model.element.Element;
 import java.util.Iterator;
 
 /**
@@ -39,6 +40,25 @@ public class SimpleListImpl<T> implements SimpleList<T> {
 			current.setNext(new ListElement<>(item));
 		}
 		size++;
+	}
+
+	@Override
+	public void remove(T item){
+		if (head == item){
+			head = null;
+			return;
+		}
+
+		// find parent
+		ListElement<T> current = head;
+		while (current.getNext() != null && current.getNext() != item){
+			current = current.getNext();
+		}
+
+		if (current.getNext() == null) return;
+
+		current.setNext(current.getNext().getNext());
+		size--;
 	}
 
 	/**

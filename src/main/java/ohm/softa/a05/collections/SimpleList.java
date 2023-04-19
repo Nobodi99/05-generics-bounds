@@ -1,5 +1,6 @@
 package ohm.softa.a05.collections;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
 /**
@@ -17,17 +18,18 @@ public interface SimpleList<T> extends Iterable<T> {
 	 */
 	void add(T o);
 
+	void remove(T o);
+
 	/**
 	 * @param clazz Class instance to solve the instantiation problem
 	 */
-	@SuppressWarnings("unchecked")
 	default void addDefault(Class<T> clazz) {
 		try {
 			/* better solution would be to use Google Guava to get a type token
 			and use this token to create a new instance
 			because we didn't include a reference to Guava this is the easiest way to create new instance of T */
-			this.add(clazz.newInstance());
-		} catch (InstantiationException | IllegalAccessException e) {
+			this.add(clazz.getDeclaredConstructor().newInstance());
+		} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 			e.printStackTrace();
 		}
 	}
@@ -47,8 +49,8 @@ public interface SimpleList<T> extends Iterable<T> {
 	default SimpleList<T> filter(SimpleFilter<T> filter) {
 		SimpleList<T> result;
 		try {
-			result = (SimpleList<T>) getClass().newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			result = getClass().getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 			result = new SimpleListImpl<>();
 		}
 
@@ -66,11 +68,11 @@ public interface SimpleList<T> extends Iterable<T> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	default <R> SimpleList<R> map(Function<T, R> transform) {
+	default <R> SimpleList<R> map(Function<? super T,? extends R> transform) {
 		SimpleList<R> result;
 		try {
-			result = (SimpleList<R>) getClass().newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			result = getClass().getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
 			result = new SimpleListImpl<>();
 		}
 		for (T t : this) {
